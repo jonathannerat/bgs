@@ -17,14 +17,14 @@
 #define LENGTH(x)       (sizeof x / sizeof x[0])
 
 /* image modes */
-enum { ModeCenter, ModeZoom, ModeScale, ModeLast };
+enum { ModeCenter, ModeZoom, ModeFit, ModeLast };
 
 struct Monitor {
 	int x, y, w, h;
 };
 
 static int sx, sy, sw, sh;		/* screen geometry */
-static unsigned int mode = ModeScale;	/* image mode */
+static unsigned int mode = ModeFit;	/* image mode */
 static Bool rotate = True;
 static Bool running = False;
 static Display *dpy;
@@ -103,7 +103,7 @@ drawbg(void) {
 				ny = monitors[i].y + (monitors[i].h - nh) / 2;
 			}
 			break;
-		default: /* ModeScale */
+		default: /* ModeFit */
 			factor = MAX((double)w / monitors[i].w,
 				     (double)h / monitors[i].h);
 			nw = w / factor;
