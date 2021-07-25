@@ -17,7 +17,7 @@
 #define LENGTH(x)       (sizeof x / sizeof x[0])
 
 /* image modes */
-enum { ModeCenter, ModeZoom, ModeFit, ModeLast };
+enum { ModeCenter, ModeZoom, ModeStretch, ModeFit, ModeLast };
 
 struct Monitor {
 	int x, y, w, h;
@@ -102,6 +102,12 @@ drawbg(void) {
 				nx = monitors[i].x;
 				ny = monitors[i].y + (monitors[i].h - nh) / 2;
 			}
+			break;
+		case ModeStretch:
+			nw = monitors[i].w;
+			nh = monitors[i].h;
+			nx = monitors[i].x;
+			ny = monitors[i].y;
 			break;
 		default: /* ModeFit */
 			factor = MAX((double)w / monitors[i].w,
@@ -223,7 +229,7 @@ main(int argc, char *argv[]) {
 	int opt;
 	const char *col = NULL;
 
-	while((opt = getopt(argc, argv, "cC:Rvxz")) != -1)
+	while((opt = getopt(argc, argv, "cC:Rsvxz")) != -1)
 		switch(opt) {
 		case 'c':
 			mode = ModeCenter;
@@ -244,8 +250,11 @@ main(int argc, char *argv[]) {
 		case 'z':
 			mode = ModeZoom;
 			break;
+		case 's':
+			mode = ModeStretch;
+			break;
 		default:
-			die("usage: bgs [-v] [-c] [-C hex] [-z] [-R] [-x] [IMAGE]...\n");
+			die("usage: bgs [-v] [-c] [-C hex] [-s] [-z] [-R] [-x] [IMAGE]...\n");
 		}
 	argc -= optind;
 	argv += optind;
