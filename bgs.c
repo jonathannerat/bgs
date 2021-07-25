@@ -55,7 +55,7 @@ die(const char *errstr) {
 void
 drawbg(void) {
 	int i, w, h, nx, ny, nh, nw, tmp;
-	double factor;
+	double factor, ir, mr;
 	Pixmap pm;
 	Imlib_Image tmpimg, buffer;
 
@@ -83,21 +83,24 @@ drawbg(void) {
 		imlib_context_set_image(buffer);
 		switch(mode) {
 		case ModeCenter:
-			nw = (monitors[i].w - w) / 2;
-			nh = (monitors[i].h - h) / 2;
+			nw = w;
+			nh = h;
 			nx = monitors[i].x + (monitors[i].w - nw) / 2;
 			ny = monitors[i].y + (monitors[i].h - nh) / 2;
 			break;
 		case ModeZoom:
-			nw = monitors[i].w;
-			nh = monitors[i].h;
-			if(w > h && (w / h > (monitors[i].w / monitors[i].h))) {
+			ir = w / h;
+			mr = monitors[i].w / monitors[i].h;
+			if (ir > mr) {
+				nh = monitors[i].h;
+				nw = ceil(w * nh / h);
+				ny = monitors[i].y;
 				nx = monitors[i].x + (monitors[i].w - nw) / 2;
-				ny = monitors[i].y + (int)ceil(h * nx / w) / 2;
-			}
-			else {
+			} else {
+				nw = monitors[i].w;
+				nh = ceil(h * nw / w);
+				nx = monitors[i].x;
 				ny = monitors[i].y + (monitors[i].h - nh) / 2;
-				nx = monitors[i].x + (int)ceil(w * ny / h) / 2;
 			}
 			break;
 		default: /* ModeScale */
