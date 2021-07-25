@@ -58,6 +58,7 @@ drawbg(void) {
 	double factor, ir, mr;
 	Pixmap pm;
 	Imlib_Image tmpimg, buffer;
+	struct Monitor *m;
 
 	pm = XCreatePixmap(dpy, root, sw, sh,
 			   DefaultDepth(dpy, DefaultScreen(dpy)));
@@ -67,14 +68,15 @@ drawbg(void) {
 	imlib_image_fill_rectangle(0, 0, sw, sh);
 	imlib_context_set_blend(1);
 	for(i = 0; i < nmonitor; i++) {
+		m = monitors + i;
 		imlib_context_set_image(images[i % nimage]);
 		w = imlib_image_get_width();
 		h = imlib_image_get_height();
 		if(!(tmpimg = imlib_clone_image()))
 			die("Error: Cannot clone image.\n");
 		imlib_context_set_image(tmpimg);
-		if(rotate && ((monitors[i].w > monitors[i].h && w < h) ||
-		   (monitors[i].w < monitors[i].h && w > h))) {
+		if(rotate && ((m->w > m->h && w < h) ||
+		   (m->w < m->h && w > h))) {
 			imlib_image_orientate(1);
 			tmp = w;
 			w = h;
@@ -85,37 +87,37 @@ drawbg(void) {
 		case ModeCenter:
 			nw = w;
 			nh = h;
-			nx = monitors[i].x + (monitors[i].w - nw) / 2;
-			ny = monitors[i].y + (monitors[i].h - nh) / 2;
+			nx = m->x + (m->w - nw) / 2;
+			ny = m->y + (m->h - nh) / 2;
 			break;
 		case ModeZoom:
 			ir = w / h;
-			mr = monitors[i].w / monitors[i].h;
+			mr = m->w / m->h;
 			if (ir > mr) {
-				nh = monitors[i].h;
+				nh = m->h;
 				nw = ceil(w * nh / h);
-				ny = monitors[i].y;
-				nx = monitors[i].x + (monitors[i].w - nw) / 2;
+				ny = m->y;
+				nx = m->x + (m->w - nw) / 2;
 			} else {
-				nw = monitors[i].w;
+				nw = m->w;
 				nh = ceil(h * nw / w);
-				nx = monitors[i].x;
-				ny = monitors[i].y + (monitors[i].h - nh) / 2;
+				nx = m->x;
+				ny = m->y + (m->h - nh) / 2;
 			}
 			break;
 		case ModeStretch:
-			nw = monitors[i].w;
-			nh = monitors[i].h;
-			nx = monitors[i].x;
-			ny = monitors[i].y;
+			nw = m->w;
+			nh = m->h;
+			nx = m->x;
+			ny = m->y;
 			break;
 		default: /* ModeFit */
-			factor = MAX((double)w / monitors[i].w,
-				     (double)h / monitors[i].h);
+			factor = MAX((double)w / m->w,
+				     (double)h / m->h);
 			nw = w / factor;
 			nh = h / factor;
-			nx = monitors[i].x + (monitors[i].w - nw) / 2;
-			ny = monitors[i].y + (monitors[i].h - nh) / 2;
+			nx = m->x + (m->w - nw) / 2;
+			ny = m->y + (m->h - nh) / 2;
 		}
 		imlib_blend_image_onto_image(tmpimg, 0, 0, 0, w, h,
 					     nx, ny, nw, nh);
@@ -140,15 +142,17 @@ updategeom(void) {
 #ifdef XINERAMA
 	int i;
 	XineramaScreenInfo *info = NULL;
+	struct Monitor *m;
 
 	if(XineramaIsActive(dpy) &&
 	   (info = XineramaQueryScreens(dpy, &nmonitor))) {
 		nmonitor = MIN(nmonitor, LENGTH(monitors));
 		for(i = 0; i < nmonitor; i++) {
-			monitors[i].x = info[i].x_org;
-			monitors[i].y = info[i].y_org;
-			monitors[i].w = info[i].width;
-			monitors[i].h = info[i].height;
+			m = monitors + i;
+			m->x = info[i].x_org;
+			m->y = info[i].y_org;
+			m->w = info[i].width;
+			m->h = info[i].height;
 		}
 		XFree(info);
 	}
