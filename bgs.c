@@ -91,8 +91,9 @@ drawbg(void) {
 			ny = m->y + (m->h - nh) / 2;
 			break;
 		case ModeZoom:
-			ir = w / h;
-			mr = m->w / m->h;
+			ir = (double) w / h;
+			mr = (double) m->w / m->h;
+			printf("ir: %f, mr: %f\n", ir, mr);
 			if (ir > mr) {
 				nh = m->h;
 				nw = ceil(w * nh / h);
